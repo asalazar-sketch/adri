@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F5 · B2 · Sprint a sprint — describe, reflexiona, triangula</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0F2040;--teal:#0D9488;--teal-dk:#0F766E;--teal-md:#14B8A6;--teal-lt:#CCFBF1;--teal-pale:#F0FDFA;--amber:#D97706;--amber-lt:#FEF3C7;--amber-dk:#92400E;--purple:#7C3AED;--purple-lt:#EDE9FE;--green:#16A34A;--green-lt:#DCFCE7;--green-dk:#14532D;--cream:#FAFAF8;--sand:#F3F0EA;--white:#FFFFFF;--ink:#1E293B;--muted:#64748B;--subtle:#94A3B8;--border:#E2E8F0;--sh-sm:0 1px 3px rgba(15,32,64,.07);--r:10px;--rsm:6px;--rlg:14px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:18px}
+body{font-family:"DM Sans",sans-serif;color:var(--ink);background:var(--cream);min-height:100vh}
+.topbar{background:var(--white);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 24px;height:56px;box-shadow:var(--sh-sm)}
+.tb-brand{font-family:"Fraunces",serif;font-size:15px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:5px;flex-shrink:0;margin-right:20px}
+.tb-dot{width:7px;height:7px;background:var(--teal);border-radius:50%}
+.tb-steps{display:flex;align-items:center;flex:1;overflow-x:auto}
+.tb-step{display:flex;align-items:center;cursor:pointer}
+.tb-step-inner{display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:20px;transition:background .2s;white-space:nowrap}
+.tb-step:hover .tb-step-inner{background:var(--sand)}
+.tb-step.active .tb-step-inner{background:var(--teal-pale);border:1px solid var(--teal-lt)}
+.tb-step-num{width:22px;height:22px;border-radius:50%;font-family:"DM Mono",monospace;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--border);color:var(--subtle)}
+.tb-step.active .tb-step-num{background:var(--teal);color:white}
+.tb-step.done .tb-step-num{background:var(--green);color:white}
+.tb-step-name{font-size:13px;font-weight:500;color:var(--muted)}
+.tb-step.active .tb-step-name{color:var(--teal-dk);font-weight:600}
+.tb-step.done .tb-step-name{color:var(--ink)}
+.tb-conn{width:20px;height:2px;background:var(--border);flex-shrink:0}
+.tb-conn.done{background:var(--green)}
+.tb-nav{display:flex;gap:8px;margin-left:16px;flex-shrink:0}
+.tb-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border-radius:var(--rsm);font-family:"DM Sans",sans-serif;font-size:13px;font-weight:600;border:1.5px solid var(--border);cursor:pointer;background:var(--white);color:var(--ink)}
+.tb-btn:hover{border-color:var(--teal);color:var(--teal-dk)}
+.tb-btn.primary{background:var(--teal);border-color:var(--teal);color:white}
+.tb-btn.primary:hover{background:var(--teal-dk)}
+.tb-pill{margin-left:10px;font-size:12px;font-weight:700;color:var(--teal-dk);background:var(--teal-pale);border:1px solid var(--teal-lt);padding:4px 13px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;font-family:"DM Mono",monospace}
+/* panels */
+.panel{display:none}
+.panel.active{display:flex;flex-direction:column;animation:pIn .18s ease}
+@keyframes pIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* index-header (solo p1) */
+.index-header{padding:12px 26px 10px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.index-header .kicker{font-size:13px;font-weight:700;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.index-header .kicker::before{content:"";width:14px;height:2px;background:var(--teal);border-radius:2px;display:block}
+.index-header .block-title{font-family:"Fraunces",serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;line-height:1.2}
+.index-header .block-title em{color:var(--teal);font-style:italic}
+.index-header .block-sub{font-size:15px;color:var(--muted);margin-bottom:6px;line-height:1.5}
+.index-header .chips{display:flex;gap:6px;flex-wrap:wrap}
+.index-header .chip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--sand);color:var(--muted)}
+.index-header .chip.ai{background:var(--purple-lt);color:var(--purple);border-color:#C4B5FD}
+.index-header .chip.bita{background:var(--teal-pale);color:var(--teal-dk);border-color:var(--teal-lt)}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.55}
+/* layouts */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:0;flex:1;overflow:hidden}
+.col-white{padding:24px 26px;background:var(--white);border-right:1px solid var(--border);overflow-y:auto}
+.col-cream{padding:24px 26px;background:var(--cream);overflow-y:auto}
+.side-260{display:grid;grid-template-columns:260px 1fr;flex:1;overflow:hidden}
+.side-panel{background:var(--white);border-right:1px solid var(--border);padding:20px 18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.main-panel{padding:22px 26px;background:var(--cream);display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+/* cards */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh-sm)}
+.card h4{font-size:17px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.card p{font-size:16px;color:var(--muted);line-height:1.75}
+.card li{font-size:16px;color:var(--muted);line-height:1.75;margin-left:18px;padding:2px 0}
+.card.navy{background:var(--navy);border-color:var(--navy)}
+.card.navy h4{font-family:"Fraunces",serif;font-size:18px;color:var(--teal-lt)}
+.card.navy p{color:rgba(255,255,255,.65)}
+.card.navy strong{color:rgba(255,255,255,.92)}
+.card.teal{background:var(--teal-pale);border-color:var(--teal-lt)}
+.card.teal p{color:var(--teal-dk)}
+.card.amber{background:var(--amber-lt);border-color:#FDE68A}
+.card.amber p{color:#78350F}
+.card.amber h4{color:var(--amber-dk)}
+.card.green{background:var(--green-lt);border-color:#86EFAC}
+.card.green h4{color:var(--green-dk)}
+.card.green p{color:var(--green-dk)}
+/* idx list */
+.idx-list{display:flex;flex-direction:column;gap:8px}
+.idx-item{display:flex;align-items:flex-start;gap:14px;padding:13px 16px;background:var(--cream);border-radius:var(--r);border:1px solid var(--border);cursor:pointer;transition:border-color .2s}
+.idx-item:hover{border-color:var(--teal-lt)}
+.idx-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:white;font-family:"DM Mono",monospace;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.idx-name{font-size:17px;font-weight:600;color:var(--navy);margin-bottom:3px}
+.idx-desc{font-size:15px;color:var(--muted);line-height:1.6}
+.idx-title{font-family:"Fraunces",serif;font-size:20px;font-weight:700;color:var(--navy);margin-bottom:16px}
+/* sprint table */
+.sprint-table{width:100%;border-collapse:collapse;font-size:15px;background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm)}
+.sprint-table th{padding:10px 14px;background:var(--navy);color:white;font-size:14px;font-weight:700;text-align:left}
+.sprint-table td{padding:10px 14px;border:1px solid var(--border);font-size:15px;line-height:1.6;vertical-align:top}
+.sprint-table tr:nth-child(even) td{background:var(--sand)}
+.s-badge{display:inline-flex;align-items:center;font-family:"DM Mono",monospace;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--navy);color:white}
+.s-badge.hito{background:var(--amber);color:white}
+/* IA block */
+.ia-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm)}
+.ia-head{background:var(--navy);padding:12px 18px;display:flex;align-items:center;gap:11px}
+.ia-av{width:30px;height:30px;background:rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ia-ht .t1{font-size:14px;font-weight:600;color:white}
+.ia-ht .t2{font-size:12px;color:rgba(255,255,255,.45)}
+.ia-body{padding:18px 20px;font-size:16px;line-height:1.8;color:var(--ink);min-height:60px}
+.ia-body p{margin-bottom:10px}.ia-body p:last-child{margin-bottom:0}
+.ia-ph{color:var(--subtle);font-style:italic}
+.ldots{display:none;align-items:center;gap:6px;padding:18px}
+.ldots.show{display:flex}
+.ld{width:8px;height:8px;border-radius:50%;background:var(--teal);animation:ldp 1.4s ease-in-out infinite}
+.ld:nth-child(2){animation-delay:.2s}.ld:nth-child(3){animation-delay:.4s}
+@keyframes ldp{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1);opacity:1}}
+.ld-lbl{font-size:14px;color:var(--muted);margin-left:4px}
+/* checklist */
+.check-layout{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden}
+.check-left{padding:24px 26px;background:var(--white);border-right:1px solid var(--border);overflow-y:auto}
+.check-right{padding:24px 26px;background:var(--cream);display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.cl-title{font-family:"Fraunces",serif;font-size:20px;font-weight:700;color:var(--navy);margin-bottom:14px}
+.cl{display:flex;flex-direction:column;gap:7px}
+.ci{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--cream);cursor:pointer;transition:all .2s;user-select:none}
+.ci:hover{border-color:var(--teal-lt);background:var(--teal-pale)}
+.ci.checked{border-color:var(--teal-lt);background:var(--teal-pale)}
+.ci-box{width:22px;height:22px;border-radius:5px;border:2px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .2s}
+.ci.checked .ci-box{background:var(--teal);border-color:var(--teal)}
+.ci-box svg{opacity:0;transition:opacity .15s}
+.ci.checked .ci-box svg{opacity:1}
+.ci-lbl{font-size:17px;font-weight:500;color:var(--ink);margin-bottom:2px;line-height:1.4}
+.ci.checked .ci-lbl{color:var(--teal-dk)}
+.ci-sub{font-size:14px;color:var(--muted)}
+.prog-wrap{margin-top:14px;padding:13px 16px;background:var(--sand);border-radius:var(--r);border:1px solid var(--border)}
+.prog-lbl{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.prog-track{height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:var(--teal);border-radius:4px;transition:width .4s ease}
+.prog-txt{font-size:15px;color:var(--muted);margin-top:6px}
+.prog-txt.all{color:var(--teal-dk);font-weight:600}
+.close-navy{padding:22px 24px;background:var(--navy);border-radius:var(--rlg)}
+.cl-kicker{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-md);display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.cl-kicker::before{content:"";width:14px;height:2px;background:var(--teal-md);border-radius:2px;display:block}
+.cl-main-title{font-family:"Fraunces",serif;font-size:22px;font-weight:700;color:white;line-height:1.2;letter-spacing:-.02em;margin-bottom:10px}
+.cl-main-title em{color:var(--teal-md);font-style:italic}
+.cl-items{display:flex;flex-direction:column;gap:8px}
+.cl-item{display:flex;align-items:flex-start;gap:9px;font-size:15px;color:rgba(255,255,255,.7);line-height:1.65}
+.cl-dot{width:7px;height:7px;border-radius:50%;background:var(--teal-md);flex-shrink:0;margin-top:6px}
+.cl-item strong{color:rgba(255,255,255,.95)}
+.bita-reminder{background:var(--teal-pale);border:1.5px solid var(--teal-lt);border-radius:var(--r);padding:15px 18px;display:flex;align-items:flex-start;gap:13px}
+.bita-rem-ico{width:36px;height:36px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bita-rem-title{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.bita-rem-text{font-size:15px;color:var(--teal-dk);line-height:1.65}
+.next-indicator{display:flex;align-items:center;gap:14px;padding:13px 18px;background:var(--teal-pale);border:1.5px solid var(--teal-lt);border-radius:var(--r)}
+.ni-label{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-dk);white-space:nowrap}
+.ni-name{font-size:16px;font-weight:600;color:var(--navy);flex:1}
+.ni-hint{font-size:13px;color:var(--teal-dk)}
+/* inputs */
+input[type=text],input[type=url],textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--rsm);font-family:"DM Sans",sans-serif;font-size:16px;color:var(--ink);background:var(--cream);transition:all .2s;display:block}
+input:focus,textarea:focus{outline:none;border-color:var(--teal);background:var(--white)}
+input::placeholder,textarea::placeholder{color:var(--subtle);font-style:italic;font-size:15px}
+textarea{line-height:1.7;resize:vertical}
+.bf-label{font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--subtle);margin-bottom:5px}
+.bf-label span{color:var(--teal-dk)}
+/* btn */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--rsm);font-family:"DM Sans",sans-serif;font-size:16px;font-weight:600;border:none;cursor:pointer}
+.btn-teal{background:var(--teal);color:white}
+.btn-teal:hover:not(:disabled){background:var(--teal-dk)}
+.btn-teal:disabled{opacity:.35;cursor:default}
+.btn-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wc-row{display:flex;justify-content:flex-end;margin-top:4px}
+.wc{font-family:"DM Mono",monospace;font-size:13px;color:var(--subtle)}
+.wc.ok{color:var(--teal)}
+/* slide mode */
+html,body{height:100%!important;overflow:hidden!important}
+body{display:flex!important;flex-direction:column!important;min-height:unset!important}
+.topbar{flex:0 0 auto!important}
+.panel.active{display:flex!important;flex-direction:column!important;flex:1 1 0!important;overflow:hidden!important;min-height:0!important}
+.index-header{flex:0 0 auto!important}
+.panel.active>div:not(.index-header){flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;-webkit-overflow-scrolling:touch}
+.two-col,.check-layout,.side-260{height:100%!important;min-height:0!important;overflow:hidden!important}
+.col-white,.col-cream,.check-left,.check-right,.side-panel,.main-panel{overflow-y:auto!important;min-height:0!important;-webkit-overflow-scrolling:touch}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* strip fix */
+.panel.active>div[style*="border-bottom"]:not(.index-header){flex:0 0 auto!important;overflow:visible!important}
+.panel.active>.index-header~div[style*="border-bottom"]{flex:0 0 auto!important;overflow:visible!important}
+/* content fills rest */
+.panel.active>div[style*="background:var(--cream)"]{flex:1 1 0!important;overflow-y:auto!important;min-height:0!important}
+.panel.active>.side-260{flex:1 1 0!important}
+.panel.active>.check-layout{flex:1 1 0!important}
+
+/* __GFX__ */
+.panel.active>div[style*="border-bottom"]:not(.index-header){flex:0 0 auto!important;overflow:visible!important}
+.panel.active>.index-header{flex:0 0 auto!important}
+.panel.active>.two-col,.panel.active>.check-layout,.panel.active>.side-260{flex:1 1 0!important;overflow:hidden!important;height:100%!important}
+.panel.active>div:not(.index-header):not([style*="border-bottom"]){flex:1 1 0!important;overflow-y:auto!important;min-height:0!important}
+.col-white,.col-cream,.side-panel,.main-panel,.check-left,.check-right{overflow-y:auto!important;min-height:0!important;-webkit-overflow-scrolling:touch}
+body,p,li,.card p,.card h4,.ci-lbl,.idx-name,.idx-desc,.cl-item{font-size:16px!important;line-height:1.75!important}
+.ci-lbl,.card h4,.cl-title,.idx-title{font-size:17px!important}
+.ci-sub,.chip,.kicker,.tb-step-name,.ni-hint,.bf-label{font-size:13px!important}
+input,input[type=text],input[type=date],input[type=url],textarea{font-size:15px!important}
+html{font-size:17px!important}
+
+</style>
+</head>
+<body>
+<header class="topbar"><div class="tb-brand">crack<div class="tb-dot"></div>the code</div><div class="tb-steps"><div class="tb-step active" id="s1" onclick="goStep(1)"><div class="tb-step-inner"><div class="tb-step-num" id="sn1">1</div><span class="tb-step-name">Indice</span></div></div><div class="tb-conn" id="c1"></div><div class="tb-step" id="s2" onclick="goStep(2)"><div class="tb-step-inner"><div class="tb-step-num" id="sn2">2</div><span class="tb-step-name">Describe el sprint</span></div></div><div class="tb-conn" id="c2"></div><div class="tb-step" id="s3" onclick="goStep(3)"><div class="tb-step-inner"><div class="tb-step-num" id="sn3">3</div><span class="tb-step-name">Reflexion post-sprint</span></div></div><div class="tb-conn" id="c3"></div><div class="tb-step" id="s4" onclick="goStep(4)"><div class="tb-step-inner"><div class="tb-step-num" id="sn4">4</div><span class="tb-step-name">Triangulacion</span></div></div><div class="tb-conn" id="c4"></div><div class="tb-step" id="s5" onclick="goStep(5)"><div class="tb-step-inner"><div class="tb-step-num" id="sn5">5</div><span class="tb-step-name">Cierre</span></div></div></div><div class="tb-nav"><button class="tb-btn" id="btn-prev" onclick="prevStep()">← Anterior</button><button class="tb-btn primary" id="btn-next-top" onclick="nextStep()">Siguiente →</button></div><div class="tb-pill">F5 · B2/4</div></header>
+<div class="panel active" id="p1"><div class="index-header">
+  <div class="kicker">Fase 5 · Bloque 2 de 4 · Produce Sección 7</div>
+  <h1 class="block-title">Sprint a sprint — <em>describe, reflexiona, triangula</em></h1>
+  <p class="block-sub">Para cada sprint: describes lo que ocurrió, reflexionas sobre el cambio y triangulas tus 3 instrumentos. La triangulación es lo que convierte datos dispersos en evidencia sólida.</p>
+  <div class="chips">
+    <span class="chip"><span class="chip-dot"></span>60 min · por sprint</span>
+    <span class="chip ai">IA identifica evidencia clave</span>
+    <span class="chip bita"><span class="chip-dot"></span>Bitácora Parte B · Análisis de sprint</span>
+  </div>
+</div>
+<div class="two-col">
+  <div class="col-white">
+    <div class="idx-title">En este bloque</div>
+    <div class="idx-list">
+      <div class="idx-item" onclick="goStep(2)"><div class="idx-num">1</div><div><div class="idx-name">Describe tu sprint mas revelador</div><div class="idx-desc">El que mejor funcionó o el que mas te sorprendio. La IA identifica donde esta la evidencia pedagogica.</div></div></div>
+      <div class="idx-item" onclick="goStep(3)"><div class="idx-num">2</div><div><div class="idx-name">Reflexion post-sprint — el puente</div><div class="idx-desc">Que aprendiste de tu intervencion. Que mantendrías igual. Que cambiarías para el siguiente sprint.</div></div></div>
+      <div class="idx-item" onclick="goStep(4)"><div class="idx-num">3</div><div><div class="idx-name">Triangulacion — los 3 instrumentos juntos</div><div class="idx-desc">Cruzas el acta + el instrumento adicional + tu reflexion. Cuando los 3 apuntan a lo mismo, tienes evidencia solida.</div></div></div>
+    </div>
+  </div>
+  <div class="col-cream" style="display:flex;flex-direction:column;gap:12px">
+    <div class="card navy"><h4>El ciclo de investigacion-accion</h4><p>Planear → Actuar → Observar → Reflexionar. La <strong>reflexion post-sprint</strong> es donde activas el siguiente ciclo. Sin ella, cada sprint empieza de cero y no hay investigacion — solo actividades.</p></div>
+    <div class="card amber"><h4>Cuantos sprints describir</h4><p>Al menos <strong>3 con detalle</strong>. En la Seccion 7 narraras todos brevemente, pero 2-3 en profundidad donde ocurrio el cambio mas significativo.</p></div>
+  </div>
+</div>
+</div><div class="panel" id="p2">
+<div style="padding:12px 26px;background:var(--white);border-bottom:1px solid var(--border);font-size:15px;color:var(--muted)">Elige tu sprint mas revelador — el que mejor funciono o el que mas te sorprendio. Describelo con detalle. La IA identifica donde esta la evidencia pedagogica.</div>
+<div class="side-260" style="flex:1">
+  <aside class="side-panel">
+    <div class="card navy"><h4>Ejemplo de observacion pedagogica rica</h4><p style="font-style:italic;color:rgba(255,255,255,.7)">"En el Sprint 2, por primera vez una estudiante de 9 inició la actividad sin preguntar. Al cerrar la sesion dijo 'ya entendi que puedo leer la consigna sola'. Eso no estaba en el acta del Sprint 0."</p><p style="margin-top:8px;color:rgba(255,255,255,.55)">Eso es evidencia pedagogica — especifica, observable y conectada con un cambio real.</p></div>
+    <div class="card teal"><p>La pregunta que orienta la descripcion: <strong>¿Que evidencia de mi pregunta de investigacion aparecio en este sprint?</strong></p></div>
+  </aside>
+  <div class="main-panel">
+    <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r);padding:18px 20px">
+      <div class="bf-label" style="margin-bottom:8px">Describe tu sprint mas revelador <span>*</span></div>
+      <textarea id="sprint-txt" rows="9" placeholder="Sprint numero: ___&#10;&#10;¿Que hice como docente investigador? ¿Como fue mi intervencion?&#10;&#10;¿Que hicieron los estudiantes? ¿Quien inicio solo? ¿Quien espero instruccion?&#10;&#10;¿Que observe en relacion a mi pregunta de investigacion?&#10;&#10;¿Que momento inesperado ocurrio? ¿Que evidencias recogi (acta, fotos, Forms)?"></textarea>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn btn-teal" id="btn-sprint" onclick="analizarSprint()" disabled>Identificar evidencia clave</button>
+        <span id="hint-sprint" style="font-size:14px;color:var(--muted)">Escribe al menos 50 palabras</span>
+      </div>
+    </div>
+    <div class="ia-card">
+      <div class="ia-head"><div class="ia-av"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" stroke="white" stroke-width="1.4"/><path d="M5 7.5C5 6 6 5 7.5 5S10 6 10 7.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><circle cx="7.5" cy="10.5" r=".9" fill="white"/></svg></div><div class="ia-ht"><div class="t1">Analisis del sprint · Crack the Code</div><div class="t2">Donde esta la evidencia pedagogica</div></div></div>
+      <div class="ldots" id="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div><span class="ld-lbl">Analizando...</span></div>
+      <div class="ia-body" id="ia-resp"><p class="ia-ph">La evidencia pedagogica aparecera aqui. Luego copia a tu bitacora.</p></div>
+    </div>
+    <div style="margin-top:10px;padding:11px 15px;background:var(--teal-pale);border:1.5px solid var(--teal-lt);border-radius:var(--rsm);display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:13px;font-weight:700;color:var(--teal-dk);margin-bottom:2px">Copia a tu bitacora</div><div style="font-size:13px;color:var(--teal-dk)">Bitacora Parte B · Analisis de sprint</div></div>
+      <span style="font-size:22px">📋</span>
+    </div>
+  </div>
+</div>
+</div><div class="panel" id="p3">
+<div style="padding:12px 26px;background:var(--white);border-bottom:1px solid var(--border);font-size:15px;color:var(--muted)">La reflexion post-sprint es el puente entre un sprint y el siguiente. Sin ella, cada sprint empieza de cero. Es donde el ciclo de investigacion-accion se activa.</div>
+<div class="side-260" style="flex:1">
+  <aside class="side-panel">
+    <div class="card navy"><h4>El ciclo se cierra aqui</h4><p>Planear → Actuar → Observar → <strong>Reflexionar</strong>. La reflexion activa el siguiente ciclo. Es donde aprendes de tu intervencion — no solo de lo que hicieron los estudiantes.</p></div>
+    <div class="card teal"><p>La reflexion no es "fue una buena sesion". Es: <strong>que de lo que hice explica lo que observe, y que cambiaria.</strong></p></div>
+  </aside>
+  <div class="main-panel">
+    <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r);padding:18px 20px">
+      <div class="bf-label" style="margin-bottom:8px">Reflexion post-sprint <span>*</span></div>
+      <textarea id="ref-sprint" rows="8" placeholder="Despues de este sprint:&#10;&#10;¿Que aprendi de mi intervencion como docente investigador?&#10;&#10;¿Que mantendria igual en el siguiente sprint?&#10;&#10;¿Que cambiaria — y por que?&#10;&#10;¿Que hipotesis tengo sobre lo que va a pasar si hago ese ajuste?"></textarea>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn btn-teal" id="btn-ref" onclick="validarReflexion()" disabled>Validar mi reflexion</button>
+        <span id="hint-ref" style="font-size:14px;color:var(--muted)">Escribe al menos 40 palabras</span>
+      </div>
+    </div>
+    <div class="ia-card">
+      <div class="ia-head"><div class="ia-av"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" stroke="white" stroke-width="1.4"/><path d="M5 7.5C5 6 6 5 7.5 5S10 6 10 7.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><circle cx="7.5" cy="10.5" r=".9" fill="white"/></svg></div><div class="ia-ht"><div class="t1">Validacion de reflexion post-sprint</div><div class="t2">Bitacora Parte B · Reflexion post-sprint</div></div></div>
+      <div class="ldots" id="ldots2"><div class="ld"></div><div class="ld"></div><div class="ld"></div><span class="ld-lbl">Validando...</span></div>
+      <div class="ia-body" id="ia-resp2"><p class="ia-ph">La validacion aparecera aqui.</p></div>
+    </div>
+    <div style="margin-top:10px;padding:11px 15px;background:var(--teal-pale);border:1.5px solid var(--teal-lt);border-radius:var(--rsm);display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:13px;font-weight:700;color:var(--teal-dk);margin-bottom:2px">Copia a tu bitacora</div><div style="font-size:13px;color:var(--teal-dk)">Bitacora Parte B · Reflexion post-sprint</div></div>
+      <span style="font-size:22px">📋</span>
+    </div>
+  </div>
+</div>
+</div><div class="panel" id="p4">
+<div style="padding:12px 26px;background:var(--white);border-bottom:1px solid var(--border);font-size:15px;color:var(--muted)">Triangular es ver el mismo fenomeno desde 3 angulos distintos. Si los 3 instrumentos apuntan a lo mismo, tu evidencia es solida.</div>
+<div class="two-col">
+  <div class="col-white">
+    <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--navy);margin-bottom:14px">Que es triangulacion</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="padding:13px 16px;background:var(--cream);border-radius:var(--r);border:1px solid var(--border)">
+        <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:5px">📝 Acta</div>
+        <div style="font-size:15px;color:var(--muted);line-height:1.7">Lo que el docente observo en el momento. Lo que ocurrio facticamente.</div>
+      </div>
+      <div style="text-align:center;font-size:22px;color:var(--teal)">+</div>
+      <div style="padding:13px 16px;background:var(--purple-lt);border-radius:var(--r);border:1.5px solid #C4B5FD">
+        <div style="font-size:16px;font-weight:700;color:var(--purple);margin-bottom:5px">🔬 Instrumento adicional</div>
+        <div style="font-size:15px;color:#5B21B6;line-height:1.7">Lo que los datos muestran — rubrica, encuesta del Forms, entrevista. Datos que el ojo no puede capturar.</div>
+      </div>
+      <div style="text-align:center;font-size:22px;color:var(--teal)">+</div>
+      <div style="padding:13px 16px;background:#EFF6FF;border-radius:var(--r);border:1.5px solid #BFDBFE">
+        <div style="font-size:16px;font-weight:700;color:#1D4ED8;margin-bottom:5px">🪞 Reflexion / Diario docente</div>
+        <div style="font-size:15px;color:#1E40AF;line-height:1.7">Lo que el docente interpreto y decidio. El significado que le das a lo que ocurrio.</div>
+      </div>
+      <div style="text-align:center;font-size:22px;color:var(--teal)">↓</div>
+      <div style="padding:13px 16px;background:var(--green-lt);border-radius:var(--r);border:1.5px solid #86EFAC">
+        <div style="font-size:16px;font-weight:700;color:var(--green-dk);margin-bottom:5px">Evidencia triangulada</div>
+        <div style="font-size:15px;color:var(--green-dk);line-height:1.7">Cuando los 3 apuntan a lo mismo, puedes afirmar con rigor que ese cambio ocurrio. <strong>Una sola fuente describe. Tres que coinciden evidencian.</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-cream">
+    <div style="font-family:'Fraunces',serif;font-size:19px;font-weight:700;color:var(--navy);margin-bottom:12px">Ejemplo de triangulacion</div>
+    <div style="padding:14px 16px;background:white;border-radius:var(--r);border:1px solid var(--border);margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px">Sprint 3 — App movil</div>
+      <div style="font-size:15px;color:var(--muted);line-height:1.8">
+        <strong style="color:var(--navy)">Acta:</strong> "4/6 estudiantes iniciaron solos la tarea de diseño sin pedir instruccion."<br>
+        <strong style="color:var(--purple)">Rubrica:</strong> nivel "en proceso" a "logrado" en 4 estudiantes en criterio de autonomia.<br>
+        <strong style="color:#1D4ED8)">Diario:</strong> "Despues de usar la consigna estructurada tres veces, ya no la necesitan para empezar."<br><br>
+        <strong style="color:var(--green-dk)">→ Los 3 apuntan al mismo cambio. Eso es evidencia triangulada.</strong>
+      </div>
+    </div>
+    <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r);padding:16px 18px">
+      <div class="bf-label" style="margin-bottom:7px">Tu triangulacion — un sprint</div>
+      <textarea id="tri-txt" rows="6" placeholder="Sprint numero: ___&#10;&#10;Acta dice: ...&#10;Instrumento adicional (Forms/rubrica/entrevista) dice: ...&#10;Mi reflexion/diario dice: ...&#10;&#10;¿Los 3 coinciden? ¿Se contradicen? ¿Que patron aparece?"></textarea>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn btn-teal" id="btn-tri" onclick="analizarTriangulacion()" disabled>Analizar patron</button>
+        <span id="hint-tri" style="font-size:14px;color:var(--muted)">Escribe los 3 instrumentos</span>
+      </div>
+    </div>
+    <div class="ia-card" style="margin-top:12px">
+      <div class="ia-head"><div class="ia-av"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" stroke="white" stroke-width="1.4"/><path d="M5 7.5C5 6 6 5 7.5 5S10 6 10 7.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><circle cx="7.5" cy="10.5" r=".9" fill="white"/></svg></div><div class="ia-ht"><div class="t1">Analisis de triangulacion · Crack the Code</div><div class="t2">Bitacora Parte B · Triangulacion</div></div></div>
+      <div class="ldots" id="ldots3"><div class="ld"></div><div class="ld"></div><div class="ld"></div><span class="ld-lbl">Triangulando...</span></div>
+      <div class="ia-body" id="ia-resp3"><p class="ia-ph">El analisis de triangulacion aparecera aqui.</p></div>
+    </div>
+    <div style="margin-top:10px;padding:11px 15px;background:var(--teal-pale);border:1.5px solid var(--teal-lt);border-radius:var(--rsm);display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:13px;font-weight:700;color:var(--teal-dk);margin-bottom:2px">Copia a tu bitacora</div><div style="font-size:13px;color:var(--teal-dk)">Bitacora Parte B · Triangulacion del sprint</div></div>
+      <span style="font-size:22px">📋</span>
+    </div>
+  </div>
+</div>
+</div><div class="panel" id="p5">
+<div class="check-layout" style="flex:1">
+  <div class="check-left">
+    <div class="cl-title">Antes de ir al B3</div>
+    <div class="cl">
+      <div class="ci" id="ci1" onclick="toggleCI('ci1')"><div class="ci-box"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5L4.5 8L9 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="ci-lbl">Describe al menos 1 sprint con detalle (el mas revelador)</div><div class="ci-sub">Slide 2 · IA identifico evidencia</div></div></div>
+      <div class="ci" id="ci2" onclick="toggleCI('ci2')"><div class="ci-box"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5L4.5 8L9 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="ci-lbl">Hice la reflexion post-sprint para ese sprint</div><div class="ci-sub">Slide 3 · el puente entre sprints</div></div></div>
+      <div class="ci" id="ci3" onclick="toggleCI('ci3')"><div class="ci-box"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5L4.5 8L9 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="ci-lbl">Triangule los 3 instrumentos en al menos 1 sprint</div><div class="ci-sub">Slide 4 · acta + instrumento + reflexion</div></div></div>
+      <div class="ci" id="ci4" onclick="toggleCI('ci4')"><div class="ci-box"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5L4.5 8L9 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="ci-lbl">Copie todo a la bitacora</div><div class="ci-sub">Bitacora · Parte B · Analisis de sprint + Triangulacion</div></div></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-lbl">Progreso</div><div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div><div class="prog-txt" id="prog-txt">0 de 4 completados</div></div>
+  </div>
+  <div class="check-right">
+    <div class="close-navy"><div class="cl-kicker">B2 completado</div><div class="cl-main-title">Tus sprints <em>estan registrados y triangulados</em></div><div class="cl-items">
+      <div class="cl-item"><div class="cl-dot"></div><div><strong>Siguiente:</strong> Verificar coherencia antes de la Entrega 1 al Campus</div></div>
+    </div></div>
+    <div class="bita-reminder"><div class="bita-rem-ico"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 2.5h10a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1v-11a1 1 0 011-1z" stroke="white" stroke-width="1.4"/><path d="M6 6h6M6 9h6M6 12h4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div><div><div class="bita-rem-title">Repite este proceso en cada sprint</div><div class="bita-rem-text">Descripcion + reflexion post-sprint + triangulacion. Al menos 3 sprints con este nivel de detalle. La Seccion 7 del informe nace de aqui.</div></div></div>
+    <div class="next-indicator"><div class="ni-label">Siguiente · F5 · B3</div><div class="ni-name">Coherencia y Entrega 1 al Campus</div><div class="ni-hint">Continua en el Campus</div></div>
+  </div>
+</div>
+</div>
+<script>
+
+const TOTAL=5; let cur=1;
+function goStep(n){if(n<1||n>TOTAL)return;for(let i=1;i<=TOTAL;i++)document.getElementById('p'+i).classList.toggle('active',i===n);cur=n;updateTopbar();}
+function nextStep(){if(cur<TOTAL)goStep(cur+1);}
+function prevStep(){if(cur>1)goStep(cur-1);}
+function updateTopbar(){for(let i=1;i<=TOTAL;i++){const s=document.getElementById('s'+i),n=document.getElementById('sn'+i),c=document.getElementById('c'+i);s.classList.remove('active','done');if(i<cur){s.classList.add('done');n.innerHTML='<svg width=\"11\" height=\"11\" viewBox=\"0 0 11 11\" fill=\"none\"><path d=\"M2 5.5L4.5 8L9 3\" stroke=\"white\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>';if(c)c.classList.add('done');}else if(i===cur){s.classList.add('active');n.textContent=i;if(c)c.classList.remove('done');}else{n.textContent=i;if(c)c.classList.remove('done');}}document.getElementById('btn-prev').disabled=cur<=1;}
+function toggleCI(id){document.getElementById(id).classList.toggle('checked');const done=document.querySelectorAll('.ci.checked').length,total=document.querySelectorAll('.ci').length;document.getElementById('prog-fill').style.width=Math.round(done/total*100)+'%';const pt=document.getElementById('prog-txt');pt.textContent=done+' de '+total+' completados';pt.className='prog-txt'+(done===total?' all':'');}
+updateTopbar();
+
+
+document.getElementById('sprint-txt').addEventListener('input',function(){const ok=this.value.trim().split(/\s+/).filter(w=>w).length>=50;document.getElementById('btn-sprint').disabled=!ok;document.getElementById('hint-sprint').textContent=ok?'Listo para analizar':'Escribe al menos 50 palabras';document.getElementById('hint-sprint').style.color=ok?'var(--teal)':'var(--muted)';});
+document.getElementById('ref-sprint').addEventListener('input',function(){const ok=this.value.trim().split(/\s+/).filter(w=>w).length>=40;document.getElementById('btn-ref').disabled=!ok;document.getElementById('hint-ref').textContent=ok?'Listo para validar':'Escribe al menos 40 palabras';document.getElementById('hint-ref').style.color=ok?'var(--teal)':'var(--muted)';});
+document.getElementById('tri-txt').addEventListener('input',function(){const ok=this.value.trim().length>=60;document.getElementById('btn-tri').disabled=!ok;document.getElementById('hint-tri').textContent=ok?'Listo para triangular':'Escribe los 3 instrumentos';document.getElementById('hint-tri').style.color=ok?'var(--teal)':'var(--muted)';});
+async function analizarSprint(){const txt=document.getElementById('sprint-txt').value.trim();const ldots=document.getElementById('ldots'),resp=document.getElementById('ia-resp');ldots.classList.add('show');resp.innerHTML='';const fallback='<p><strong>Evidencia pedagogica identificada:</strong> El sprint muestra un momento significativo de cambio en el equipo.</p><p><strong>Para fortalecer:</strong> Especifica cuantos de 6 estudiantes hicieron X, que dijo alguien exactamente, y como se relaciona con tu pregunta de investigacion.</p><p><strong>Competencia AO presente:</strong> Segun lo que describes, hay indicios de Pensamiento critico — el equipo tomo una decision que no estaba en el plan.</p>';try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:280,system:'Eres un asesor de investigacion-accion educativa del programa Crack the Code. Analiza la descripcion de un sprint e identifica: (1) que evidencia pedagogica real hay, (2) que comportamientos observables son los mas significativos para la investigacion, (3) que competencia AO del programa esta presente. En castellano, max 120 palabras, especifico.',messages:[{role:'user',content:txt}]})});const data=await res.json();ldots.classList.remove('show');const text=data.content?.[0]?.text||'';resp.innerHTML=text?text.split(/\n+/).filter(p=>p.trim()).map(p=>'<p>'+p+'</p>').join(''):fallback;}catch(e){ldots.classList.remove('show');resp.innerHTML=fallback;}}
+async function validarReflexion(){const txt=document.getElementById('ref-sprint').value.trim();const ldots=document.getElementById('ldots2'),resp=document.getElementById('ia-resp2');ldots.classList.add('show');resp.innerHTML='';const fallback='<p><strong>La reflexion tiene elementos reales:</strong> Identificas algo que cambiarias, que es el nucleo de una buena reflexion post-sprint.</p><p><strong>Para profundizar:</strong> Añade una hipotesis especifica — si cambio X en el siguiente sprint, espero que Y ocurra. Eso convierte la reflexion en un momento cientifico del ciclo.</p>';try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:'Eres un asesor de investigacion-accion educativa. Valida si esta reflexion post-sprint del docente activa genuinamente el siguiente ciclo (planear-actuar-observar-reflexionar). Señala si es solo una evaluacion o si realmente orienta el proximo sprint con una hipotesis de ajuste. Max 80 palabras, castellano.',messages:[{role:'user',content:txt}]})});const data=await res.json();ldots.classList.remove('show');const text=data.content?.[0]?.text||'';resp.innerHTML=text?text.split(/\n+/).filter(p=>p.trim()).map(p=>'<p>'+p+'</p>').join(''):fallback;}catch(e){ldots.classList.remove('show');resp.innerHTML=fallback;}}
+async function analizarTriangulacion(){const txt=document.getElementById('tri-txt').value.trim();const ldots=document.getElementById('ldots3'),resp=document.getElementById('ia-resp3');ldots.classList.add('show');resp.innerHTML='';const fallback='<p><strong>Convergencia:</strong> Los instrumentos apuntan en la misma direccion — eso es evidencia triangulada solida.</p><p><strong>Patron identificado:</strong> El cambio mas significativo es consistente en los 3 fuentes.</p><p><strong>Para el analisis de F6:</strong> Este patron triangulado es tu resultado mas robusto — usalo como eje central al responder tu pregunta de investigacion.</p>';try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:'Eres un asesor de investigacion-accion educativa. Analiza si los 3 instrumentos (acta, instrumento adicional, reflexion del docente) convergen hacia el mismo fenomeno pedagogico, o si se contradicen. Identifica el patron central que emerge. Max 90 palabras, castellano.',messages:[{role:'user',content:txt}]})});const data=await res.json();ldots.classList.remove('show');const text=data.content?.[0]?.text||'';resp.innerHTML=text?text.split(/\n+/).filter(p=>p.trim()).map(p=>'<p>'+p+'</p>').join(''):fallback;}catch(e){ldots.classList.remove('show');resp.innerHTML=fallback;}}
+
+</script>
+</body>
+</html>
